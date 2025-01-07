@@ -4,7 +4,12 @@ import qrcode from "qrcode";
 import express from "express"; // Use Express for HTTP server
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url"; // Required for __dirname in ES modules
 import { runModel } from "./chat_with_assistant.js";
+
+// Fix for __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize Express app
 const app = express();
@@ -96,3 +101,4 @@ client.initialize();
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running at http://0.0.0.0:${PORT}`);
 });
+
