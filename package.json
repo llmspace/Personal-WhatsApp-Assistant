@@ -9,8 +9,8 @@
   },
   "keywords": ["whatsapp", "chatbot", "nodejs", "langchain"],
   "author": {
-    "name": "Rahees Ahmed",
-    "url": "https://github.com/raheesahmed"
+    "name": "mr X",
+    "url": "https://github.com/"
   },
   "license": "ISC",
   "dependencies": {
@@ -30,11 +30,11 @@
     "openai": "^4.28.4",
     "pdf-parse": "^1.1.1",
     "qrcode-terminal": "^0.12.0",
-    "qrcode": "^1.5.0", // Added qrcode dependency
+    "qrcode": "^1.5.0", 
     "whatsapp-web.js": "^1.23.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0" // Moved nodemon to devDependencies
+    "nodemon": "^3.1.0"
   },
   "type": "module"
 }
