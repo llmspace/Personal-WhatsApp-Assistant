@@ -92,4 +92,7 @@ client.on("message", async (msg) => {
 // Start WhatsApp client
 client.initialize();
 
-// Start Express serv
+// Start Express server
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running at http://0.0.0.0:${PORT}`);
+});
