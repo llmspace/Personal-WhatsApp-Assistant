@@ -1,3 +1,11 @@
+const fs = require('fs');
+const path = './data';
+
+// Ensure the ./data directory exists
+if (!fs.existsSync(path)) {
+    fs.mkdirSync(path);
+    console.log('Created missing ./data directory');
+}
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
