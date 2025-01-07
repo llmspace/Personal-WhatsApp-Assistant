@@ -1,8 +1,14 @@
 import pkg from "whatsapp-web.js";
 const { Client, LocalAuth } = pkg;
-import qrcode from "qrcode-terminal";
-import { runModel } from "./chat_with_assistant.js";
+import qrcode from "qrcode";
 import express from "express"; // Use Express for HTTP server
+import fs from "fs";
+import path from "path";
+import { runModel } from "./chat_with_assistant.js";
+
+// Initialize Express app
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 // Initialize WhatsApp client
 const client = new Client({
@@ -11,19 +17,44 @@ const client = new Client({
     args: ["--no-sandbox"],
   },
   authStrategy: new LocalAuth(),
-  webVersionCache: {
-    type: "remote",
-    remotePath:
-      "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2411.2.html",
-  },
-  authTimeoutMs: 60000, // Optional: timeout for authentication in milliseconds
-  qrTimeout: 30000, // Optional: timeout for QR code generation
+});
+
+// Serve a simple UI with the QR code
+app.get("/", (req, res) => {
+  const qrPath = path.join(__dirname, "qr.png");
+  if (fs.existsSync(qrPath)) {
+    res.send(`
+      <h1>WhatsApp Bot is Running</h1>
+      <p>Scan the QR code below to authenticate:</p>
+      <img src="/qr" alt="QR Code" />
+    `);
+  } else {
+    res.send(`
+      <h1>WhatsApp Bot is Running</h1>
+      <p>Waiting for QR code to be generated. Please check back shortly.</p>
+    `);
+  }
+});
+
+// Serve the QR code image
+app.get("/qr", (req, res) => {
+  const qrPath = path.join(__dirname, "qr.png");
+  if (fs.existsSync(qrPath)) {
+    res.sendFile(qrPath);
+  } else {
+    res.status(404).send("QR code not generated yet.");
+  }
 });
 
 // Event listener for QR code generation
-client.on("qr", (qr) => {
-  qrcode.generate(qr, { small: true });
-  console.log("QR code generated. Scan it with your WhatsApp app.");
+client.on("qr", async (qr) => {
+  console.log("QR Code received. Generating image...");
+  try {
+    await qrcode.toFile("./qr.png", qr); // Save QR code as an image
+    console.log("QR Code saved as qr.png");
+  } catch (err) {
+    console.error("Error generating QR Code:", err);
+  }
 });
 
 // Event listener for when the client is ready
@@ -33,7 +64,7 @@ client.on("ready", () => {
 
 // Event listener for successful authentication
 client.on("authenticated", () => {
-  console.log("Client is authenticated!");
+  console.log("Client authenticated!");
 });
 
 // Event listener for authentication failure
@@ -43,21 +74,14 @@ client.on("auth_failure", (msg) => {
 
 // Event listener for incoming messages
 client.on("message", async (msg) => {
-  console.log("MESSAGE RECEIVED", msg);
+  console.log("MESSAGE RECEIVED:", msg);
 
   try {
-    // Mark the message as seen and indicate availability
-    await client.sendSeen(msg.from);
-    await client.sendPresenceAvailable();
-
-    // Generate a response using the AI model
     const response = await runModel(msg.body);
-    console.log("RESPONSE", response);
-
-    // Send the response back to the user
     await client.sendMessage(msg.from, response);
+    console.log("RESPONSE SENT:", response);
   } catch (error) {
-    console.error("Error in processing message:", error);
+    console.error("Error processing message:", error);
     await client.sendMessage(
       msg.from,
       "There was an error processing your request. Please try again later."
@@ -65,30 +89,7 @@ client.on("message", async (msg) => {
   }
 });
 
-// Initialize the WhatsApp client
-client
-  .initialize()
-  .then(() => {
-    console.log("Client initialized successfully");
-  })
-  .catch((err) => {
-    console.error("Error initializing client:", err);
-  });
+// Start WhatsApp client
+client.initialize();
 
-// Create an Express server for Render's port binding requirement
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Define a simple route for monitoring or debugging
-app.get("/", (req, res) => {
-  res.send(`
-    <h1>WhatsApp Bot is Running</h1>
-    <p>The bot is active and ready to receive messages.</p>
-    <p>Check logs for QR code or incoming messages.</p>
-  `);
-});
-
-// Start listening on the specified port and host
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on http://0.0.0.0:${PORT}`);
-});
+// Start Express serv
