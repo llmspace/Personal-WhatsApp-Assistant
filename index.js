@@ -2,7 +2,7 @@ import pkg from "whatsapp-web.js";
 const { Client, LocalAuth } = pkg;
 import qrcode from "qrcode-terminal";
 import { runModel } from "./chat_with_assistant.js";
-import http from "http"; // Import HTTP module for Render port binding
+import express from "express"; // Use Express for HTTP server
 
 // Initialize WhatsApp client
 const client = new Client({
@@ -23,6 +23,7 @@ const client = new Client({
 // Event listener for QR code generation
 client.on("qr", (qr) => {
   qrcode.generate(qr, { small: true });
+  console.log("QR code generated. Scan it with your WhatsApp app.");
 });
 
 // Event listener for when the client is ready
@@ -37,7 +38,7 @@ client.on("authenticated", () => {
 
 // Event listener for authentication failure
 client.on("auth_failure", (msg) => {
-  console.error("Authentication failure", msg);
+  console.error("Authentication failure:", msg);
 });
 
 // Event listener for incoming messages
@@ -56,7 +57,7 @@ client.on("message", async (msg) => {
     // Send the response back to the user
     await client.sendMessage(msg.from, response);
   } catch (error) {
-    console.error("Error in generating assessment", error);
+    console.error("Error in processing message:", error);
     await client.sendMessage(
       msg.from,
       "There was an error processing your request. Please try again later."
@@ -71,18 +72,23 @@ client
     console.log("Client initialized successfully");
   })
   .catch((err) => {
-    console.error("Error initializing client", err);
+    console.error("Error initializing client:", err);
   });
 
-// Add an HTTP server for Render port binding
-const PORT = process.env.PORT || 3000; // Use PORT environment variable or default to 3000
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { "Content-Type": "text/plain" });
-  res.end("WhatsApp bot is running!\n");
+// Create an Express server for Render's port binding requirement
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Define a simple route for monitoring or debugging
+app.get("/", (req, res) => {
+  res.send(`
+    <h1>WhatsApp Bot is Running</h1>
+    <p>The bot is active and ready to receive messages.</p>
+    <p>Check logs for QR code or incoming messages.</p>
+  `);
 });
 
-// Start listening on the specified port
-server.listen(PORT, "0.0.0.0", () => {
+// Start listening on the specified port and host
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on http://0.0.0.0:${PORT}`);
 });
-
