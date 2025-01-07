@@ -1,14 +1,17 @@
 {
   "name": "whatapp_chatbot",
   "version": "1.0.0",
-  "description": "",
+  "description": "A WhatsApp chatbot using Node.js",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
-  "keywords": [],
-  "author": "Rahees Ahmed",
-  "author-url": "https://github.com/raheesahmed",
+  "keywords": ["whatsapp", "chatbot", "nodejs", "langchain"],
+  "author": {
+    "name": "Rahees Ahmed",
+    "url": "https://github.com/raheesahmed"
+  },
   "license": "ISC",
   "dependencies": {
     "@langchain/community": "^0.0.41",
@@ -24,11 +27,14 @@
     "langchain": "^0.1.37",
     "mammoth": "^1.7.0",
     "multer": "^1.4.5-lts.1",
-    "nodemon": "^3.1.0",
     "openai": "^4.28.4",
     "pdf-parse": "^1.1.1",
     "qrcode-terminal": "^0.12.0",
+    "qrcode": "^1.5.0", // Added qrcode dependency
     "whatsapp-web.js": "^1.23.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0" // Moved nodemon to devDependencies
   },
   "type": "module"
 }
